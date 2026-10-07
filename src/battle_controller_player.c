@@ -1368,6 +1368,7 @@ static void FreeMonSpriteAfterFaintAnim(void)
         FreeOamMatrix(gSprites[gBattlerSpriteIds[gActiveBattler]].oam.matrixNum);
         DestroySprite(&gSprites[gBattlerSpriteIds[gActiveBattler]]);
         SetHealthboxSpriteInvisible(gHealthboxSpriteIds[gActiveBattler]);
+        AnimateMonAfterKnockout(gActiveBattler);
         PlayerBufferExecCompleted();
     }
 }

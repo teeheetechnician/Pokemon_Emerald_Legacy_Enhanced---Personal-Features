@@ -280,5 +280,6 @@ void SetControllerToLinkOpponent(void);
 
 // link partner
 void SetControllerToLinkPartner(void);
+void AnimateMonAfterKnockout(u8 battler);
 
 #endif // GUARD_BATTLE_CONTROLLERS_H

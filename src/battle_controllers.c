@@ -1,4 +1,5 @@
 #include "global.h"
+#include "sound.h"
 #include "battle.h"
 #include "battle_ai_script_commands.h"
 #include "battle_anim.h"
@@ -1512,4 +1513,45 @@ void BtlController_EmitEndLinkBattle(u8 bufferId, u8 battleOutcome)
     sBattleBuffersTransferData[3] = gSaveBlock2Ptr->frontier.disableRecordBattle;
     sBattleBuffersTransferData[5] = sBattleBuffersTransferData[4] = RecordedBattle_BufferNewBattlerData(&sBattleBuffersTransferData[6]);
     PrepareBufferDataTransfer(bufferId, sBattleBuffersTransferData, sBattleBuffersTransferData[4] + 6);
+}
+
+static void LaunchKOAnimation(u8 battlerId, bool8 isFront)
+{
+    u16 species = gBattleMons[battlerId].species;
+    struct Sprite *sprite = &gSprites[gBattlerSpriteIds[battlerId]];
+
+    if (isFront)
+    {
+        u8 panMode = (GetBattlerSide(battlerId) == B_SIDE_PLAYER) ? 0 : 1;
+        BattleAnimateFrontSprite(sprite, species, FALSE, panMode);
+    }
+    else
+    {
+        BattleAnimateBackSprite(sprite, species);
+
+        if (GetBattlerSide(battlerId) == B_SIDE_PLAYER)
+            PlayCry_Normal(species, -25);
+        else
+            PlayCry_Normal(species, 25);
+    }
+}
+
+void AnimateMonAfterKnockout(u8 battler)
+{
+    u8 oppositeBattler = BATTLE_OPPOSITE(battler);
+    u8 partnerBattler = BATTLE_PARTNER(oppositeBattler);
+    bool8 wasPlayerSideKnockedOut = (GetBattlerSide(battler) == B_SIDE_PLAYER);
+
+    if (!(gAbsentBattlerFlags & gBitTable[oppositeBattler])
+     && gBattleMons[oppositeBattler].hp != 0)
+    {
+        LaunchKOAnimation(oppositeBattler, wasPlayerSideKnockedOut);
+    }
+
+    if ((gBattleTypeFlags & BATTLE_TYPE_DOUBLE)
+     && !(gAbsentBattlerFlags & gBitTable[partnerBattler])
+     && gBattleMons[partnerBattler].hp != 0)
+    {
+        LaunchKOAnimation(partnerBattler, wasPlayerSideKnockedOut);
+    }
 }

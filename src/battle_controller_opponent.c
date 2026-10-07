@@ -407,6 +407,7 @@ static void HideHealthboxAfterMonFaint(void)
     if (!gSprites[gBattlerSpriteIds[gActiveBattler]].inUse)
     {
         SetHealthboxSpriteInvisible(gHealthboxSpriteIds[gActiveBattler]);
+        AnimateMonAfterKnockout(gActiveBattler);
         OpponentBufferExecCompleted();
     }
 }
