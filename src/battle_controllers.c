@@ -1527,7 +1527,7 @@ static void LaunchKOAnimation(u8 battlerId, bool8 isFront)
     }
     else
     {
-        BattleAnimateBackSprite(sprite, species);
+        BattleAnimateBackSpriteSlow(sprite, species);
 
         if (GetBattlerSide(battlerId) == B_SIDE_PLAYER)
             PlayCry_Normal(species, -25);

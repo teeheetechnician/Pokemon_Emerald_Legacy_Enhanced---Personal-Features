@@ -7091,6 +7091,19 @@ void BattleAnimateBackSprite(struct Sprite *sprite, u16 species)
     }
 }
 
+void BattleAnimateBackSpriteSlow(struct Sprite *sprite, u16 species)
+{
+    if (gHitMarker & HITMARKER_NO_ANIMATIONS && !(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK)))
+    {
+        sprite->callback = SpriteCallbackDummy;
+    }
+    else
+    {
+        LaunchAnimationTaskForBackSpriteSlow(sprite, GetSpeciesBackAnimSet(species));
+        sprite->callback = SpriteCallbackDummy_2;
+    }
+}
+
 // Identical to GetOpposingLinkMultiBattlerId but for the player
 // "rightSide" from that team's perspective, i.e. B_POSITION_*_RIGHT
 static u8 UNUSED GetOwnOpposingLinkMultiBattlerId(bool8 rightSide)

@@ -962,6 +962,19 @@ void LaunchAnimationTaskForBackSprite(struct Sprite *sprite, u8 backAnimSet)
     gTasks[taskId].tAnimId = sBackAnimationIds[animId];
 }
 
+void LaunchAnimationTaskForBackSpriteSlow(struct Sprite *sprite, u8 backAnimSet)
+{
+    u8 taskId, animId;
+
+    taskId = CreateTask(Task_HandleMonAnimation, 128);
+    gTasks[taskId].tPtrHi = (u32)(sprite) >> 16;
+    gTasks[taskId].tPtrLo = (u32)(sprite);
+
+    // Use the slow variant for KO animations.
+    animId = 3 * backAnimSet + 2;
+    gTasks[taskId].tAnimId = sBackAnimationIds[animId];
+}
+
 #undef tState
 #undef tPtrHi
 #undef tPtrLo
