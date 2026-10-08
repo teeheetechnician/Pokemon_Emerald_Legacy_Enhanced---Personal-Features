@@ -3470,9 +3470,9 @@ static void Anim_HorizontalRepeatedSpring_Slow(struct Sprite *sprite)
         HandleStartAffineAnim(sprite);
         sprite->data[2]++;
         sprite->data[7] = 0;
-        sprite->data[6] = 4;
-        sprite->data[5] = 256;
-        sprite->data[4] = 16;
+        sprite->data[6] = 6;
+        sprite->data[5] = 512;
+        sprite->data[4] = 8;
     }
 
     HorizontalRepeatedSpring(sprite);
@@ -3668,14 +3668,14 @@ static void Anim_VerticalSquishBounce_Slow(struct Sprite *sprite)
 
 static void Anim_HorizontalSlide_Slow(struct Sprite *sprite)
 {
-    sprite->data[0] = 80;
+    sprite->data[0] = 53;
     HorizontalSlide(sprite);
     sprite->callback = HorizontalSlide;
 }
 
 static void Anim_VerticalSlide_Slow(struct Sprite *sprite)
 {
-    sprite->data[0] = 80;
+    sprite->data[0] = 53;
     VerticalSlide(sprite);
     sprite->callback = VerticalSlide;
 }
@@ -3720,7 +3720,7 @@ static void Anim_ZigzagSlow(struct Sprite *sprite)
 
 static void Anim_HorizontalShake_Slow(struct Sprite *sprite)
 {
-    sprite->data[0] = 30;
+    sprite->data[0] = 45;
     sprite->data[7] = 3;
     HorizontalShake(sprite);
     sprite->callback = HorizontalShake;
@@ -3902,7 +3902,7 @@ static void Anim_VerticalShakeBack(struct Sprite *sprite)
 
 static void Anim_VerticalShakeBack_Slow(struct Sprite *sprite)
 {
-    sprite->data[0] = 30;
+    sprite->data[0] = 45;
     sprite->data[7] = 3;
     VerticalShakeBack(sprite);
     sprite->callback = VerticalShakeBack;
@@ -3936,9 +3936,8 @@ static void Anim_VerticalShakeHorizontalSlide_Slow(struct Sprite *sprite)
         }
 
         sprite->y2 = Sin(sprite->data[2] % 128, 4);
-        sprite->data[2] += 24;
+        sprite->data[2] += 36;
     }
-
     TryFlipX(sprite);
 }
 
@@ -4178,7 +4177,7 @@ static void Anim_VerticalShakeBack_Fast(struct Sprite *sprite)
 
 static void Anim_VerticalShakeLowTwice_Slow(struct Sprite *sprite)
 {
-    sprite->data[0] = 24;
+    sprite->data[0] = 30;
     sprite->data[7] = 6;
     VerticalShakeLowTwice(sprite);
     sprite->callback = VerticalShakeLowTwice;
@@ -4478,9 +4477,9 @@ static void Anim_HorizontalSpring_Slow(struct Sprite *sprite)
         HandleStartAffineAnim(sprite);
         sprite->data[2]++;
         sprite->data[7] = 0;
-        sprite->data[6] = 4;
-        sprite->data[5] = 256;
-        sprite->data[4] = 16;
+        sprite->data[6] = 6;
+        sprite->data[5] = 512;
+        sprite->data[4] = 8;
     }
 
     HorizontalSpring(sprite);
@@ -4534,7 +4533,7 @@ static void Anim_ShrinkGrow_Slow(struct Sprite *sprite)
     {
         HandleStartAffineAnim(sprite);
         sprite->data[7] = 3;
-        sprite->data[6] = 4;
+        sprite->data[6] = 6;
     }
 
     ShrinkGrow(sprite);
