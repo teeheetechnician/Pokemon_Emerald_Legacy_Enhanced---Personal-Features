@@ -67,6 +67,7 @@
 #include "constants/songs.h"
 #include "constants/trainer_hill.h"
 #include "constants/weather.h"
+#include "dns.h"
 
 struct CableClubPlayer
 {
@@ -1502,6 +1503,8 @@ u8 OverworldSpeedup_AdditionalIterations(u16 speed, bool32 overworld)
 
 static void OverworldBasic(void)
 {
+    DnsApplyFilters();
+    ScriptContext_RunScript();
     ScriptContext_RunScript();
     RunTasks();
     AnimateSprites();

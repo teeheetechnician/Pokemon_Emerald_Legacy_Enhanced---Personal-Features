@@ -5,6 +5,7 @@
 #include "gpu_regs.h"
 #include "task.h"
 #include "constants/rgb.h"
+#include "dns.h"
 
 enum
 {
@@ -108,7 +109,7 @@ void TransferPlttBuffer(void)
     {
         void *src = gPlttBufferFaded;
         void *dest = (void *)PLTT;
-        DmaCopy16(3, src, dest, PLTT_SIZE);
+        DnsTransferPlttBuffer(src, dest);
         sPlttBufferTransferPending = FALSE;
         if (gPaletteFade.mode == HARDWARE_FADE && gPaletteFade.active)
             UpdateBlendRegisters();
