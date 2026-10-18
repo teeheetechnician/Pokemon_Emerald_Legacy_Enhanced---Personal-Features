@@ -357,6 +357,7 @@ const u16 gPaletteTagExceptions[] =
     0xD710, //TAG_STATUS_SUMMARY_BAR_PAL
     0xD712, //TAG_STATUS_SUMMARY_BALLS_PAL
     0x8002, // OBJ_EVENT_PAL_TAG_EMOTES
+    5113,  // Registered-item menu icon palette
 };
 
 /***********************************************

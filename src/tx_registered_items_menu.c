@@ -96,7 +96,8 @@ static void TxRegItemsMenu_RemoveScrollIndicator(void);
 static void TxRegItemsMenu_FreeStructs(void);
 
 #define TAG_ITEM_ICON       5110
-#define TAG_INDICATOR_ARROWS       TAG_ITEM_ICON//109
+#define TAG_ITEM_ICON_PAL   5113
+#define TAG_INDICATOR_ARROWS TAG_ITEM_ICON//109
 #define TILE_TAG_INDICATOR_ARROWS  0x13f8
 #define TAG_SCROLL_ARROW    TAG_ITEM_ICON//5112
 
@@ -426,8 +427,8 @@ static void TxRegItemsMenu_PrintItemIcon(u16 itemId)
     if (*spriteIdLoc == SPRITE_NONE)
     {
         FreeSpriteTilesByTag(TAG_ITEM_ICON);
-        FreeSpritePaletteByTag(TAG_ITEM_ICON);
-        spriteId = AddItemIconSprite(TAG_ITEM_ICON, TAG_ITEM_ICON, itemId);
+        FreeSpritePaletteByTag(TAG_ITEM_ICON_PAL);
+        spriteId = AddItemIconSprite(TAG_ITEM_ICON, TAG_ITEM_ICON_PAL, itemId);
         
         if (spriteId != MAX_SPRITES)
         {
@@ -440,7 +441,7 @@ static void TxRegItemsMenu_PrintItemIcon(u16 itemId)
 
     if (handleFlash && *spriteId2Loc == SPRITE_NONE)
     {
-        spriteId2 = AddItemIconSprite(TAG_ITEM_ICON, TAG_ITEM_ICON, itemId);
+        spriteId2 = AddItemIconSprite(TAG_ITEM_ICON, TAG_ITEM_ICON_PAL, itemId);
         if (spriteId2 != MAX_SPRITES)
         {
             *spriteId2Loc = spriteId2;
@@ -716,7 +717,7 @@ static void TxRegItemsMenu_RemoveItemIcon(void) //remove item storage selected i
     if (*spriteIdLoc != SPRITE_NONE)
     {
         FreeSpriteTilesByTag(TAG_ITEM_ICON);
-        FreeSpritePaletteByTag(TAG_ITEM_ICON);
+        FreeSpritePaletteByTag(TAG_ITEM_ICON_PAL);
         DestroySprite(&(gSprites[*spriteIdLoc]));
         *spriteIdLoc = SPRITE_NONE;
     }
@@ -724,7 +725,7 @@ static void TxRegItemsMenu_RemoveItemIcon(void) //remove item storage selected i
     if (GetFlashLevel() > 0 && *spriteId2Loc != SPRITE_NONE)
     {
         FreeSpriteTilesByTag(TAG_ITEM_ICON);
-        FreeSpritePaletteByTag(TAG_ITEM_ICON);
+        FreeSpritePaletteByTag(TAG_ITEM_ICON_PAL);
         DestroySprite(&(gSprites[*spriteId2Loc]));
         *spriteId2Loc = SPRITE_NONE;
     }
