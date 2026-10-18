@@ -18,4 +18,7 @@ void DnsTransferPlttBuffer(void *src, void *dest);
 void DnsApplyFilters();
 u8 GetDnsTimeLapse(u8 hour);
 
+void DnsSetFieldMoveMonPaletteTag(u16 tag);
+void DnsClearFieldMoveMonPaletteTag(void);
+
 #endif /* GUARD_DNS_UTILS_H */

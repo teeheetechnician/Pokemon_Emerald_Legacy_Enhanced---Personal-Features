@@ -356,6 +356,7 @@ const u16 gPaletteTagExceptions[] =
     0xD704, //TAG_HEALTHBAR_PAL
     0xD710, //TAG_STATUS_SUMMARY_BAR_PAL
     0xD712, //TAG_STATUS_SUMMARY_BALLS_PAL
+    0x8002, // OBJ_EVENT_PAL_TAG_EMOTES
 };
 
 /***********************************************
@@ -365,7 +366,7 @@ const u16 gPaletteTagExceptions[] =
 
 //Functions
 static u16 DnsApplyFilterToColour(u16 colour, u16 filter);
-static u16 DnsApplyProportionalFilterToColour(u16 colour, u16 filter);
+static u16 DnsApplyProportionalFilterToColour(u16 colour, u8 redFactor, u8 greenFactor, u8 blueFactor);
 static void DoDnsLightning();
 static u16 GetDNSFilter();
 static bool8 IsMapDNSException();
@@ -376,7 +377,7 @@ static bool8 IsLightActive();
 
 //Dns palette buffer in EWRAM
 ALIGNED(4) EWRAM_DATA static u16 sDnsPaletteDmaBuffer[512] = {0};
-
+EWRAM_DATA static u16 sDnsFieldMoveMonPaletteTag = 0xFFFF;
 
 /* **************************************************** *
  * **************** D&N for pokeemerald *************** *
@@ -387,40 +388,56 @@ ALIGNED(4) EWRAM_DATA static u16 sDnsPaletteDmaBuffer[512] = {0};
  ****************************************************** */
 
 //Called from TransferPlttBuffer
+
 void DnsTransferPlttBuffer(void *src, void *dest)
 {
-    if ((IsOverworld() || IsCombat()) && !IsMapDNSException()) 
+    if ((IsOverworld() || IsCombat()) && !IsMapDNSException())
     {
         DmaCopy16(3, sDnsPaletteDmaBuffer, dest, PLTT_SIZE);
+        return;
     }
-    else
-    {
-        DmaCopy16(3, src, dest, PLTT_SIZE);
-    }
+
+    DmaCopy16(3, src, dest, PLTT_SIZE);
 }
 
 /* Applies filter to palette colours, stores new palettes in EWRAM buffer.   *
  * It must be called from CB2 if the DNS wants to be used (similar to        *
  * TransferPlttBuffer)  in VBlank callbacks                                  */
+
 void DnsApplyFilters()
 {
     u8 palNum, colNum;
-    u16 colour, rgbFilter;
+    u16 rgbFilter;
+    u8 redFactor, greenFactor, blueFactor;
     struct DnsPalExceptions palExceptionFlags;
 
     rgbFilter = GetDNSFilter();
 
-    palExceptionFlags = gMain.inBattle ? gCombatPalExceptions : gOWPalExceptions;   //Init pal exception slots
+    redFactor = 0x1F - (rgbFilter & 0x1F);
+    greenFactor = (0x3E0 - (rgbFilter & 0x3E0)) >> 5;
+    blueFactor = (0x7C00 - (rgbFilter & 0x7C00)) >> 10;
+
+    palExceptionFlags = gMain.inBattle ? gCombatPalExceptions : gOWPalExceptions;
 
     for (palNum = 0; palNum < 32; palNum++)
-        if (palExceptionFlags.pal[palNum] && (palNum < 15 || !IsSpritePaletteTagDnsException(palNum - 16)))
-            for (colNum = 0; colNum < 16; colNum++) //Transfer filtered palette to buffer
-                sDnsPaletteDmaBuffer[palNum * 16 + colNum] = DnsApplyProportionalFilterToColour(gPlttBufferFaded[palNum * 16 + colNum], rgbFilter);
+    {
+        if (palExceptionFlags.pal[palNum] && (palNum < 16 || !IsSpritePaletteTagDnsException(palNum - 16)))
+        {
+            for (colNum = 0; colNum < 16; colNum++)
+                sDnsPaletteDmaBuffer[palNum * 16 + colNum] =
+                    DnsApplyProportionalFilterToColour(
+                        gPlttBufferFaded[palNum * 16 + colNum],
+                        redFactor, greenFactor, blueFactor);
+        }
         else
-            for (colNum = 0; colNum < 16; colNum++)  //Transfers palette to buffer without filtering
-                sDnsPaletteDmaBuffer[palNum * 16 + colNum] = gPlttBufferFaded[palNum * 16 + colNum];      
-    // Temporarily disabled to test whether special lighting causes
-    // nighttime yellow patches and flickering.
+        {
+            for (colNum = 0; colNum < 16; colNum++)
+                sDnsPaletteDmaBuffer[palNum * 16 + colNum] =
+                    gPlttBufferFaded[palNum * 16 + colNum];
+        }
+    }
+
+    // Temporarily disabled while investigating lighting artifacts.
     //if (!IsMapDNSException() && IsLightActive() && !gMain.inBattle)
     //    DoDnsLightning();
 }
@@ -441,15 +458,16 @@ static u16 DnsApplyFilterToColour(u16 colour, u16 filter)
 /*Alternative way to apply filter. Works similar to the first one, but colours are substracted PROPORTIONALLY.
 This system is great if you want to avoid colours with low rgb channels getting donw to 0 too fast.
 That's something that can easily happen with above Andrea's filtering system.*/
-static u16 DnsApplyProportionalFilterToColour(u16 colour, u16 filter)
+
+static u16 DnsApplyProportionalFilterToColour(u16 colour, u8 redFactor, u8 greenFactor, u8 blueFactor)
 {
     u32 red, green, blue;
 
-    red = (colour & 0x1F) * (0x1F - (filter & 0x1F)) >> 5;
-    green = ((colour & 0x3E0) >> 5) * ((0x3E0 - (filter & 0x3E0)) >> 5) >> 5;
-    blue = ((colour & 0x7C00) >> 10) * ((0x7C00 - (filter & 0x7C00)) >> 10) >> 5;
+    red = (colour & 0x1F) * redFactor >> 5;
+    green = ((colour & 0x3E0) >> 5) * greenFactor >> 5;
+    blue = ((colour & 0x7C00) >> 10) * blueFactor >> 5;
 
-    return RGB2(red <= 31 ? red : 0, green <= 31 ? green : 0, blue <= 31 ? blue : 0);  
+    return RGB2(red <= 31 ? red : 0, green <= 31 ? green : 0, blue <= 31 ? blue : 0);
 }
 
 //returns the filter to use depending on RTC time.
@@ -535,12 +553,29 @@ static bool8 IsMapDNSException()
 //Returns true if the palette should not be affected by DNS filtering
 static bool8 IsSpritePaletteTagDnsException(u8 palNum)
 {
+    u16 tag = GetSpritePaletteTagByPaletteNum(palNum);
     u8 i;
 
-    for (i = 0; i < sizeof(gPaletteTagExceptions)/sizeof(gPaletteTagExceptions[0]); i++)
-        if (GetSpritePaletteTagByPaletteNum(palNum) == gPaletteTagExceptions[i])
+    if (tag == sDnsFieldMoveMonPaletteTag)
+        return TRUE;
+
+    for (i = 0; i < sizeof(gPaletteTagExceptions) / sizeof(gPaletteTagExceptions[0]); i++)
+    {
+        if (tag == gPaletteTagExceptions[i])
             return TRUE;
+    }
+
     return FALSE;
+}
+
+void DnsSetFieldMoveMonPaletteTag(u16 tag)
+{
+    sDnsFieldMoveMonPaletteTag = tag;
+}
+
+void DnsClearFieldMoveMonPaletteTag(void)
+{
+    sDnsFieldMoveMonPaletteTag = 0xFFFF;
 }
 
 //Returns true if overworld is running
